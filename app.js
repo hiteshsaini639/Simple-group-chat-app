@@ -2,7 +2,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const path = require("path");
-let username;
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -14,23 +13,24 @@ app.get("/login", (req, res, next) => {
 });
 
 app.post("/logged-in", (req, res, next) => {
-  username = req.body.username;
   res.redirect("/");
 });
 
 app.get("/", (req, res, next) => {
   let content = fs.readFileSync(process.cwd() + "/" + "message.txt").toString();
   res.send(
-    `<h1>Chat...</h1><p>${content}</p><form action="/save" method="POST"><input id="msg" name="${username}" type="text"><br><button type="submit" >Send</button></form>`
+    `<h1>Chat...</h1><p>${content}</p><form onsubmit="document.getElementById('username').value=localStorage.getItem('username')" action="/save" method="POST"><input name="msg" type="text" ><input type="hidden" name="username" id="username"><br><button type="submit" >Send</button></form>`
   );
 });
 
 app.post("/save", (req, res, next) => {
-  let name = Object.keys(req.body);
-  username = name;
-  fs.appendFile("message.txt", `${name}: ${req.body[name]},  `, function (err) {
-    if (err) throw err;
-  });
+  fs.appendFile(
+    "message.txt",
+    `${req.body.username}: ${req.body.msg},  `,
+    function (err) {
+      if (err) throw err;
+    }
+  );
   res.redirect("/");
 });
 
